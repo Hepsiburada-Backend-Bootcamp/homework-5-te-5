@@ -52,6 +52,10 @@ namespace Ecommerce.Infrastructure.DapperRepository
                 sql += " AND Brand = @Brand ";
             }
 
+            if (!String.IsNullOrEmpty(parameters.Name))
+            {
+                sql += " AND Name = @Name ";
+            }
             
             sql += pagingSql;
             var result = await _dbConnection.QueryAsync<Product>(sql, parameters);

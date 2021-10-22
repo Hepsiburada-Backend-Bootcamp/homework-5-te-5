@@ -12,5 +12,6 @@ namespace Ecommerce.Domain.Parameters
         public int? MaxPrice { get; set; }
 
         public string Brand { get; set; }
+        public string Name { get; set; }
     }
 }
