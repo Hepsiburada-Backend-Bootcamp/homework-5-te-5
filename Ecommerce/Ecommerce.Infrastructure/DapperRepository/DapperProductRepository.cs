@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
 using Ecommerce.Domain.Models;
+using Ecommerce.Domain.Parameters;
 using Ecommerce.Domain.Repositories;
 using Ecommerce.Infrastructure.Context;
 using Microsoft.Extensions.Configuration;
@@ -34,10 +35,26 @@ namespace Ecommerce.Infrastructure.DapperRepository
             return await _dbConnection.QuerySingleOrDefaultAsync<Guid>(getSql, product);
         }
 
-        public async Task<List<Product>> GetAllAsync()
+        public async Task<List<Product>> GetAllAsync(ProductParameters parameters)
         {
-            string sql = "SELECT * FROM Products";
-            var result = await _dbConnection.QueryAsync<Product>(sql);
+            string sql = "SELECT * FROM Products WHERE Price > @MinPrice ";
+            string pagingSql = "ORDER BY Name " +
+                               "LIMIT @PageSize " +
+                               "OFFSET @Offset ";
+
+            if (parameters.MaxPrice.HasValue)
+            {
+                sql += " AND Price <= @MaxPrice ";
+            }
+
+            if (!String.IsNullOrEmpty(parameters.Brand))
+            {
+                sql += " AND Brand = @Brand ";
+            }
+
+            
+            sql += pagingSql;
+            var result = await _dbConnection.QueryAsync<Product>(sql, parameters);
             return result.ToList();
         }
 

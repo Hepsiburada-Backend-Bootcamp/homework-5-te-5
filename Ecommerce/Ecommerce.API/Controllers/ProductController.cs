@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Ecommerce.Application.Dtos;
 using Ecommerce.Application.Services;
+using Ecommerce.Domain.Parameters;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ecommerce.API.Controllers
@@ -42,9 +43,9 @@ namespace Ecommerce.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetProducts()
+        public async Task<IActionResult> GetProducts([FromQuery] ProductParameters parameters)
         {
-            return Ok(await _service.GetProducts());
+            return Ok(await _service.GetProducts(parameters));
         }
 
         [HttpPut("{id}")]
