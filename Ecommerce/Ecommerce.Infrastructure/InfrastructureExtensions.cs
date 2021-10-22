@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Data;
+using Ecommerce.Domain.Models;
 using Ecommerce.Domain.Repositories;
 using Ecommerce.Infrastructure.Context;
 using Ecommerce.Infrastructure.DapperRepository;
 using Ecommerce.Infrastructure.EFRepository;
 using Ecommerce.Infrastructure.MongoRepository;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,15 +26,9 @@ namespace Ecommerce.Infrastructure
                 options.UseNpgsql(configuration.GetConnectionString("PostgresConnection"),
                         b => b.MigrationsAssembly("Ecommerce.API"))
                 .UseSnakeCaseNamingConvention());
-            
-            
-            services.AddDbContext<UserIdentityContext>(options =>
-                options.UseNpgsql(configuration.GetConnectionString("PostgresConnection"),
-                        b => b.MigrationsAssembly("Ecommerce.API"))
-                    .UseSnakeCaseNamingConvention()
-                    );
-            
-            
+
+            services.AddDefaultIdentity<User>().AddEntityFrameworkStores<EcommerceDbContext>();
+
             services.Configure<OrderDatabaseSettings>(configuration.GetSection(nameof(OrderDatabaseSettings)));
             services.AddSingleton<IOrderDatabaseSettings>(sp => 
                 sp.GetRequiredService<IOptions<OrderDatabaseSettings>>().Value);

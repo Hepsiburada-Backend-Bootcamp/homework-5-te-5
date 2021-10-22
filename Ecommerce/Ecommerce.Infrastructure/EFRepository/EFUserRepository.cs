@@ -23,7 +23,7 @@ namespace Ecommerce.Infrastructure.EFRepository
         {
             await _dbSet.AddAsync(user);
             await _dbContext.SaveChangesAsync();
-            return user.Id;
+            return Guid.Empty; //gecici
         }
 
         public Task<List<User>> GetAllAsync()
