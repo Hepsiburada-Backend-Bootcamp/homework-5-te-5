@@ -25,6 +25,14 @@ namespace Ecommerce.Infrastructure
                         b => b.MigrationsAssembly("Ecommerce.API"))
                 .UseSnakeCaseNamingConvention());
             
+            
+            services.AddDbContext<UserIdentityContext>(options =>
+                options.UseNpgsql(configuration.GetConnectionString("PostgresConnection"),
+                        b => b.MigrationsAssembly("Ecommerce.API"))
+                    .UseSnakeCaseNamingConvention()
+                    );
+            
+            
             services.Configure<OrderDatabaseSettings>(configuration.GetSection(nameof(OrderDatabaseSettings)));
             services.AddSingleton<IOrderDatabaseSettings>(sp => 
                 sp.GetRequiredService<IOptions<OrderDatabaseSettings>>().Value);
