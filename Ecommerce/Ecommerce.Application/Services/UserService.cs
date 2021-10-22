@@ -3,9 +3,14 @@ using Ecommerce.Application.Dtos;
 using Ecommerce.Domain.Dtos;
 using Ecommerce.Domain.Models;
 using Ecommerce.Domain.Repositories;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,49 +18,152 @@ namespace Ecommerce.Application.Services
 {
     public class UserService : IUserService
     {
-        private readonly IUserRepository _repository;
-        private readonly IMapper _mapper;
+        private UserManager<User> _userManager;
+        private IConfiguration _configuration;
 
-        public UserService(IUserRepository repository, IMapper mapper)
+        public UserService(UserManager<User> userManager, IConfiguration configuration)
         {
-            _repository = repository;
-            _mapper = mapper;
+            _userManager = userManager;
+            _configuration = configuration;
         }
 
-        public async Task<Guid> CreateUser(CreateUserDto dto)
-        {
-            User user = _mapper.Map<CreateUserDto, User>(dto);
-            return await _repository.AddAsync(user);
-        }
 
-        public Task DeleteUser(Guid id)
+        public async Task<Response> RegisterUserAsync(RegisterUserDto model)
         {
-            return _repository.DeleteAsync(id);
-        }
+            if (model == null)
+                throw new NullReferenceException("Register model is null");
 
-        public async Task<UserDto> GetUser(Guid id)
-        {
-            User user = await _repository.FindByIdAsync(id);
-            return _mapper.Map<User, UserDto>(user);
-        }
+            if (model.Password != model.ConfirmPassword)
+                return new Response
+                {
+                    Message = "Confirm password doesnt match the password",
+                    IsSuccess = false,
+                };
 
-        public async Task<List<UserDto>> GetUsers()
-        {
-            List<User> users = await _repository.GetAllAsync();
-
-            return _mapper.Map<List<User>, List<UserDto>>(users);
-        }
-
-        public async Task UpdateUser(Guid id, UpdateUserDto dto)
-        {
-            if (id != dto.Id)
+            var user = new User
             {
-                throw new ApplicationException(id + "does not match the dto");
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                Email = model.Email,
+                UserName = model.Email,
+            };
+
+            var result = await _userManager.CreateAsync(user, model.Password);
+
+            if (result.Succeeded)
+                return new Response
+                {
+                    Message = "User created successfully!",
+                    IsSuccess = true
+                };
+
+            return new Response
+            {
+                Message = "User did not create.",
+                IsSuccess = false,
+                Errors = result.Errors.Select(e => e.Description)
+            };
+        }
+
+        public async Task<Response> LoginUserAsync(LoginUserDto model)
+        {
+            var user = await _userManager.FindByEmailAsync(model.Email);
+
+            if (user == null)
+            {
+                return new Response
+                {
+                    Message = "There is no user with that email address",
+                    IsSuccess = false
+                };
             }
 
-            User user = await _repository.FindByIdAsync(id);
-            user = _mapper.Map(dto, user);
-            await _repository.UpdateAsync(user);
+            var result = await _userManager.CheckPasswordAsync(user, model.Password);
+
+            if (!result)
+                return new Response
+                {
+                    Message = "Invalid password",
+                    IsSuccess = false
+                };
+
+            var claims = new[]
+            {
+                new Claim("Email",model.Email),
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+
+                //new Claim(ClaimTypes.Role, "Admin")
+
+            };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+
+            var token = new JwtSecurityToken(
+                    issuer: _configuration["Jwt:Issuer"],
+                    audience: _configuration["Jwt:Issuer"],
+                    claims: claims,
+                    expires: DateTime.Now.AddMinutes(1),
+                    signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256));
+
+            string tokenAsString = new JwtSecurityTokenHandler().WriteToken(token);
+
+            return new Response
+            {
+                Message = tokenAsString,
+                IsSuccess = true,
+                ExpireDate = token.ValidTo
+
+            };
         }
+
+
+
+
+
+        //private readonly IUserRepository _repository;
+        //private readonly IMapper _mapper;
+
+        //public UserService(IUserRepository repository, IMapper mapper)
+        //{
+        //    _repository = repository;
+        //    _mapper = mapper;
+        //}
+
+        //public async Task<Guid> CreateUser(RegisterUserDto dto)
+        //{
+        //    User user = _mapper.Map<RegisterUserDto, User>(dto);
+        //    return await _repository.AddAsync(user);
+        //}
+
+        //public Task DeleteUser(Guid id)
+        //{
+        //    return _repository.DeleteAsync(id);
+        //}
+
+        //public async Task<UserDto> GetUser(Guid id)
+        //{
+        //    User user = await _repository.FindByIdAsync(id);
+        //    return _mapper.Map<User, UserDto>(user);
+        //}
+
+        //public async Task<List<UserDto>> GetUsers()
+        //{
+        //    List<User> users = await _repository.GetAllAsync();
+
+        //    return _mapper.Map<List<User>, List<UserDto>>(users);
+        //}
+
+        //public async Task UpdateUser(Guid id, UpdateUserDto dto)
+        //{
+        //    if (id != dto.Id)
+        //    {
+        //        throw new ApplicationException(id + "does not match the dto");
+        //    }
+
+        //    User user = await _repository.FindByIdAsync(id);
+        //    user = _mapper.Map(dto, user);
+        //    await _repository.UpdateAsync(user);
+        //}
+
     }
 }
