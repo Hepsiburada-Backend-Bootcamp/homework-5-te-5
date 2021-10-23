@@ -19,12 +19,14 @@ namespace Ecommerce.Application.Services
     public class UserService : IUserService
     {
         private UserManager<User> _userManager;
+        private RoleManager<IdentityRole> _roleManager;
         private IConfiguration _configuration;
 
-        public UserService(UserManager<User> userManager, IConfiguration configuration)
+        public UserService(UserManager<User> userManager, IConfiguration configuration, RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _configuration = configuration;
+            _roleManager = roleManager;
         }
 
 
@@ -87,14 +89,18 @@ namespace Ecommerce.Application.Services
                     IsSuccess = false
                 };
 
-            var claims = new[]
+            var roleList = await _userManager.GetRolesAsync(user);
+
+            var claims = new List<Claim>
             {
                 new Claim("Email",model.Email),
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
-
-                //new Claim(ClaimTypes.Role, "Admin")
-
             };
+
+            foreach (var item in roleList)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, item));
+            }
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
 
@@ -114,6 +120,19 @@ namespace Ecommerce.Application.Services
                 ExpireDate = token.ValidTo
 
             };
+        }
+
+        public async Task AssignAdminRoleToUser(LoginUserDto model)
+        {
+            if (!await _roleManager.RoleExistsAsync("Admin"))
+            {
+                IdentityRole role = new IdentityRole { Name = "Admin" };
+                await _roleManager.CreateAsync(role);
+            }
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+
+            await _userManager.AddToRoleAsync(user, "Admin");
         }
 
 

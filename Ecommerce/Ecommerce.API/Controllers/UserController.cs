@@ -2,56 +2,63 @@ using System;
 using System.Threading.Tasks;
 using Ecommerce.Application.Dtos;
 using Ecommerce.Application.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ecommerce.API.Controllers
 {
+
     [ApiController]
     [Route("api/v1/users")]
     public class UserController : ControllerBase
     {
-        private readonly IUserService _service;
+        private readonly IUserService _userService;
 
-        public UserController(IUserService service)
+        public UserController(IUserService userService)
         {
-            _service = service;
+            _userService = userService;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> AddUser([FromBody] CreateUserDto dto)
+        [HttpPost("Register")]
+        public async Task<IActionResult> RegisterAsync([FromBody] RegisterUserDto model)
         {
-            return Ok(await _service.CreateUser(dto));
+            if (ModelState.IsValid)
+            {
+                var result = await _userService.RegisterUserAsync(model);
+
+                if (result.IsSuccess)
+                    return Ok(result);
+                return BadRequest(result);
+            }
+
+            return BadRequest("Some properties are not valid.");
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser([FromRoute]Guid id)
+
+        [HttpPost("Login")]
+        public async Task<IActionResult> LoginAsync([FromBody] LoginUserDto model)
         {
-            await _service.DeleteUser(id);
+
+            if (ModelState.IsValid)
+            {
+                var result = await _userService.LoginUserAsync(model);
+
+                if (result.IsSuccess)
+                    return Ok(result);
+                return BadRequest(result);
+            }
+
+            return BadRequest("Some properties are not valid.");
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPatch]
+        public async Task<IActionResult> AssignAdminRoleToUser([FromBody] LoginUserDto model)
+        {
+            await _userService.AssignAdminRoleToUser(model);
+
             return Ok();
-        }
-        
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetUser([FromRoute]Guid id)
-        {
-            var result = await _service.GetUser(id);
 
-            if (result == null)
-                return NotFound();
-
-            return Ok(result);
-        }
-        
-        [HttpGet]
-        public async Task<IActionResult> GetUsers()
-        {
-            return Ok(await _service.GetUsers());
-        }
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser([FromRoute]Guid id, [FromBody]UpdateUserDto dto)
-        {
-            await _service.UpdateUser(id, dto);
-            return Ok();
         }
     }
 }
