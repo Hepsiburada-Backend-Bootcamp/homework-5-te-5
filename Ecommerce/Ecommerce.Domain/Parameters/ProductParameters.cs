@@ -12,9 +12,11 @@ namespace Ecommerce.Domain.Parameters
         public int? MaxPrice { get; set; }
 
         public string Brand { get; set; }
+        public string Category { get; set; }
         public string Name { get; set; }
 
         public string SearchByBrand { get; set; }
+        public string SearchByCategory { get; set; }
         public string SearchByName { get; set; }
     }
 }
