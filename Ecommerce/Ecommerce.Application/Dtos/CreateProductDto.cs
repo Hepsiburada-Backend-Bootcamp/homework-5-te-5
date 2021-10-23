@@ -13,6 +13,8 @@ namespace Ecommerce.Application.Dtos
         public string Name { get; set; }
         [Required, StringLength(56, MinimumLength = 4)]
         public string Brand { get; set; }
+        [Required, StringLength(56, MinimumLength = 4)]
+        public string Category { get; set; }
         [Required, Range(1, 50000)]
         public double Price { get; set; }
     }

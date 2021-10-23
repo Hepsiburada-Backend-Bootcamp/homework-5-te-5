@@ -27,6 +27,7 @@ namespace Ecommerce.Infrastructure.MongoRepository
         
         public async Task<List<OrderDto>> LoadAllAsync()
         {
+            // TODO: DOES NOT WORK
             return await _context.Orders.Find(new BsonDocument()).ToListAsync();
         }
 

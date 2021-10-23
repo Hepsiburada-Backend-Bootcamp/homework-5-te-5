@@ -2,6 +2,7 @@
 using Ecommerce.Application.Dtos;
 using Ecommerce.Domain.Dtos;
 using Ecommerce.Domain.Models;
+using Ecommerce.Domain.Parameters;
 using Ecommerce.Domain.Repositories;
 using System;
 using System.Collections.Generic;
@@ -43,9 +44,9 @@ namespace Ecommerce.Application.Services
             return _mapper.Map<Product, ProductDto>(product);
         }
 
-        public async Task<List<ProductDto>> GetProducts()
+        public async Task<List<ProductDto>> GetProducts(ProductParameters parameters)
         {
-            List<Product> products = await _repository.GetAllAsync();
+            List<Product> products = await _repository.GetAllAsync(parameters);
 
             return _mapper.Map<List<Product>, List<ProductDto>>(products);
         }
