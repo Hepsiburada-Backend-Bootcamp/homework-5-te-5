@@ -2,10 +2,12 @@ using System;
 using System.Threading.Tasks;
 using Ecommerce.Application.Dtos;
 using Ecommerce.Application.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ecommerce.API.Controllers
 {
+    [Authorize(Roles = "Admin")]
     [ApiController]
     [Route("api/v1/products")]
     public class ProductController : ControllerBase
@@ -30,6 +32,7 @@ namespace Ecommerce.API.Controllers
             return Ok();
         }
 
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProduct([FromRoute]Guid id)
         {
@@ -41,6 +44,7 @@ namespace Ecommerce.API.Controllers
             return Ok(result);
         }
 
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetProducts()
         {

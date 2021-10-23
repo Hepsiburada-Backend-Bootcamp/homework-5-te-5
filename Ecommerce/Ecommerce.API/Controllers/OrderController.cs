@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Ecommerce.Application.Dtos;
 using Ecommerce.Application.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ecommerce.API.Controllers
@@ -98,6 +99,7 @@ namespace Ecommerce.API.Controllers
             return Ok(result);
         }
 
+
         [HttpGet("records/orders/{orderId:guid}")]
         public async Task<IActionResult> LoadByOrderId(Guid orderId)
         {
@@ -109,6 +111,7 @@ namespace Ecommerce.API.Controllers
             return Ok(result);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("records/orders/")]
         public async Task<IActionResult> LoadAll()
         {
