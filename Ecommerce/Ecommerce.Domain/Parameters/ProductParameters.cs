@@ -13,5 +13,8 @@ namespace Ecommerce.Domain.Parameters
 
         public string Brand { get; set; }
         public string Name { get; set; }
+
+        public string SearchByBrand { get; set; }
+        public string SearchByName { get; set; }
     }
 }

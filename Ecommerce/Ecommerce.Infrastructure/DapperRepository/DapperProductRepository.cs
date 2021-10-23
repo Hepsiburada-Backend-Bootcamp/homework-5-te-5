@@ -44,19 +44,29 @@ namespace Ecommerce.Infrastructure.DapperRepository
 
             if (parameters.MaxPrice.HasValue)
             {
-                sql += " AND Price <= @MaxPrice ";
+                sql += "AND Price <= @MaxPrice ";
             }
 
             if (!String.IsNullOrEmpty(parameters.Brand))
             {
-                sql += " AND Brand = @Brand ";
+                sql += "AND Brand = @Brand ";
             }
 
             if (!String.IsNullOrEmpty(parameters.Name))
             {
-                sql += " AND Name = @Name ";
+                sql += "AND Name = @Name ";
             }
-            
+
+            if (!String.IsNullOrEmpty(parameters.SearchByBrand))
+            {
+                sql += "AND Brand LIKE CONCAT('%', @SearchByBrand, '%') ";
+            }
+
+            if (!String.IsNullOrEmpty(parameters.SearchByName))
+            {
+                sql += "AND Name LIKE CONCAT('%', @SearchByName, '%') ";
+            }
+
             sql += pagingSql;
             var result = await _dbConnection.QueryAsync<Product>(sql, parameters);
             return result.ToList();
