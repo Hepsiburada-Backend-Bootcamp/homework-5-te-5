@@ -22,7 +22,6 @@ namespace Ecommerce.Application
             CreateMap<UpdateProductDto, Product>();
 
             CreateMap<User, UserDto>();
-            //CreateMap<CreateUserDto, User>();
             CreateMap<UpdateUserDto, User>();
 
             CreateMap<OrderItem, OrderItemDto>()

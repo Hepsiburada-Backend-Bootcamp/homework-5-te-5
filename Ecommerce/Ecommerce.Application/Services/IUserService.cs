@@ -9,11 +9,6 @@ namespace Ecommerce.Application.Services
 {
     public interface IUserService
     {
-        //Task<Guid> CreateUser(CreateUserDto dto);
-        //Task<List<UserDto>> GetUsers();
-        //Task<UserDto> GetUser(Guid id);
-        //Task DeleteUser(Guid id);
-        //Task UpdateUser(Guid id, UpdateUserDto dto);
         Task<Response> RegisterUserAsync(RegisterUserDto model);
         Task<Response> LoginUserAsync(LoginUserDto model);
         Task AssignAdminRoleToUser(LoginUserDto model);

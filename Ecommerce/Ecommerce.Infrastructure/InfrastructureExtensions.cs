@@ -5,7 +5,6 @@ using Ecommerce.Domain.Models;
 using Ecommerce.Domain.Repositories;
 using Ecommerce.Infrastructure.Context;
 using Ecommerce.Infrastructure.DapperRepository;
-using Ecommerce.Infrastructure.EFRepository;
 using Ecommerce.Infrastructure.MongoRepository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -35,8 +34,8 @@ namespace Ecommerce.Infrastructure
             services.AddIdentity<User, IdentityRole>(options =>
             {
                 options.Tokens.AuthenticatorIssuer = configuration.GetSection("Jwt")["Issuer"];
-//                options.Password.RequireDigit = true;
- //               options.Password.RequiredLength = 5;
+                //options.Password.RequireDigit = true;
+                //options.Password.RequiredLength = 5;
             }).AddEntityFrameworkStores<EcommerceDbContext>().AddDefaultTokenProviders();
 
 
@@ -69,7 +68,6 @@ namespace Ecommerce.Infrastructure
             services.AddScoped<IOrderMongoContext, OrderMongoContext>();
             
             services.AddScoped<IProductRepository,DapperProductRepository>();
-            services.AddScoped<IUserRepository, EFUserRepository>();
             services.AddScoped<IOrderRepository, DapperOrderRepository>();
             services.AddScoped<IOrderRecordRepository, OrderMongoRepository>();
 
